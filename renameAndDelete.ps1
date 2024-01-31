@@ -28,10 +28,10 @@ function Convert-EmoDBToRAVDESS{
     if ($emotionMapping.ContainsKey($emotionCode)) {
         $ravdessEmotionCode = $emotionMapping[$emotionCode]
 
-        #Make new file name
-		#$ravdessFilename = "{0}-{1}-{2}-{3}-{4}" -f $ravdessEmotionCode, $intensityCode, $statementCode, $repCode, $speakerNumber
+        #Make new file name		
 		$ravdessFilename = "03-01-{0}-{1}-{2}-{3}-{4}" -f $ravdessEmotionCode, $intensityCode, $statementCode, $repCode, $speakerNumber
-        return $ravdessFilename
+        
+		return $ravdessFilename
     } else {
         throw "Unsupported emotion code: $emotionCode"
     }
@@ -46,23 +46,26 @@ function ConvertToNumber{
     return $asciiValue
 }
 
-#Target folder
-#$emodbFolder = "G:\DBs to Merge\EmoDB"
-$emodbFolder = "C:\Users\Duder\Desktop"
+#Target folders
+$emodbFolder = "G:\DBs to Merge\EmoDB" #"C:\Users\Duder\Desktop"
+$renamedFilesFolder = "G:\DBs to Merge\NewEmoDB"
 
-#Loop through the files & convert
+#Clean new folder before copying
+Remove-Item -Path $renamedFilesFolder\* -Recurse -Force
+
+#Loop through the files & convert & skip boredom
 $emodbFiles = Get-ChildItem -Path $emodbFolder -Filter *.wav
+
 foreach ($emodbFile in $emodbFiles) {
     $convertedFilename = Convert-EmoDBToRAVDESS -emodbFilename $emodbFile.BaseName
     if ($convertedFilename -ne $null) {
-        #Check if the emotion code is 'L' and delete the file
+        #Check if the emotion code is 'L' and skip it
         if ($emodbFile.BaseName.Substring(5, 1) -eq 'L') {
-            Write-Host "Deleting EmoDB Filename with 'L' emotion: $($emodbFile.Name)"
-            Remove-Item -Path $emodbFile.FullName -Force
-        } else {
-            $newFilePath = Join-Path -Path $emodbFolder -ChildPath "$convertedFilename.wav"
-            Rename-Item -Path $emodbFile.FullName -NewName $newFilePath
-            Write-Host "EmoDB Filename: $($emodbFile.Name) -> RAVDESS Filename: $($convertedFilename).wav"
-        }
+			#Skip copying
+		}else{
+			$destinationPath = Join-Path -Path $renamedFilesFolder -ChildPath "$convertedFilename.wav"
+			Copy-Item -Path $emodbFile.FullName -Destination $destinationPath
+			Write-Host "EmoDB Filename: $($emodbFile.Name) -> RAVDESS Filename: $($convertedFilename).wav"
+		}
     }
 }

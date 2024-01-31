@@ -1,0 +1,10 @@
+#Loop through the file & convert
+$emodbFiles = Get-ChildItem -Path $emodbFolder -Filter *.wav
+foreach ($emodbFile in $emodbFiles) {
+    $convertedFilename = Convert-EmoDBToRAVDESS -emodbFilename $emodbFile.BaseName
+    if ($convertedFilename -ne $null) {
+        $newFilePath = Join-Path -Path $emodbFolder -ChildPath "$convertedFilename.wav"
+        Rename-Item -Path $emodbFile.FullName -NewName $newFilePath
+        Write-Host "EmoDB Filename: $($emodbFile.Name) -> RAVDESS Filename: $($convertedFilename).wav"
+    }
+}
