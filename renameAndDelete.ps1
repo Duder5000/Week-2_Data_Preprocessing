@@ -1,13 +1,17 @@
 #Convert EmoDB file names to RAVDESS style
-function Convert-EmoDBToRAVDESS {
-    param (
-        [string]$emodbFilename
-    )
+function Convert-EmoDBToRAVDESS{
+    param ([string]$emodbFilename)
 
     #Get info from EmoDB file name
     $speakerNumber = $emodbFilename.Substring(0, 2)
     $textCode = $emodbFilename.Substring(2, 3)
     $emotionCode = $emodbFilename.Substring(5, 1)
+	$intensityCode = 'IC'
+	$statementCode = 'SC'
+	
+	$repCode = $emodbFilename.Substring(6)
+	$repCode = ConvertToNumber($repCode)
+	$repCode = '0' + $repCode
 
     #Map codes
     $emotionMapping = @{
@@ -25,15 +29,26 @@ function Convert-EmoDBToRAVDESS {
         $ravdessEmotionCode = $emotionMapping[$emotionCode]
 
         #Make new file name
-        $ravdessFilename = "{0}-01-{1}-01-{2}-01-{3}" -f $ravdessEmotionCode, $speakerNumber, $textCode, $ravdessEmotionCode
+		#$ravdessFilename = "{0}-{1}-{2}-{3}-{4}" -f $ravdessEmotionCode, $intensityCode, $statementCode, $repCode, $speakerNumber
+		$ravdessFilename = "03-01-{0}-{1}-{2}-{3}-{4}" -f $ravdessEmotionCode, $intensityCode, $statementCode, $repCode, $speakerNumber
         return $ravdessFilename
     } else {
         throw "Unsupported emotion code: $emotionCode"
     }
 }
 
+#Convert the EmoDB repetition letters to numbers
+function ConvertToNumber{
+    param ([char]$letter)
+    # Convert letter to ASCII value
+    $asciiValue = [int][char]::ToUpper($letter) - [int][char]'A' + 1
+
+    return $asciiValue
+}
+
 #Target folder
-$emodbFolder = "G:\DBs to Merge\EmoDB"
+#$emodbFolder = "G:\DBs to Merge\EmoDB"
+$emodbFolder = "C:\Users\Duder\Desktop"
 
 #Loop through the files & convert
 $emodbFiles = Get-ChildItem -Path $emodbFolder -Filter *.wav
