@@ -43,8 +43,9 @@ function Convert-EmoDBToRAVDESS{
 	}
 	
     
-	$textCode = $emodbFilename.Substring(2, 3)
+	#$textCode = $emodbFilename.Substring(2, 3)
     $emotionCode = $emodbFilename.Substring(5, 1)
+	$emotionCode = [char]::ToUpper($emotionCode) #Checking if forcing to upper char could fix not getting all te=he files
 	
 	$intensityCode = '01' #Set all to Normal intensity
 	$statementCode = '03' #Set all do a diffrent statement than the 2 in RAVDESS
@@ -87,7 +88,7 @@ function ConvertToNumber{
 }
 
 #Target folders
-$emodbFolder = "G:\DBs to Merge\EmoDB" #"C:\Users\Duder\Desktop"
+$emodbFolder = "G:\DBs to Merge\EmoDB"
 $renamedFilesFolder = "G:\DBs to Merge\NewEmoDB"
 
 #Clean new folder before copying
