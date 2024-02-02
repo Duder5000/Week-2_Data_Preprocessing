@@ -42,10 +42,12 @@ function Convert-EmoDBToRAVDESS{
 		$speakerNumber = 99
 	}
 	
+	$speakingTextCode = $emodbFilename.Substring(2, 3)	
+	
     $emotionCode = $emodbFilename.Substring(5, 1)
 	
 	$intensityCode = '01' #Set all to Normal intensity
-	$statementCode = '03' #Set all do a diffrent statement than the 2 in RAVDESS
+	$statementCode = $speakingTextCode #'03' #Set all do a diffrent statement than the 2 in RAVDESS
 	
 	$repCode = $emodbFilename.Substring(6)
 	$repCode = ConvertToNumber($repCode)
@@ -85,7 +87,7 @@ function ConvertToNumber{
 }
 
 #Target folders
-$emodbFolder = "G:\DBs to Merge\EmoDB"
+$emodbFolder = "G:\DBs to Merge\EmoDB" #"G:\DBs to Merge\smallTest"
 $renamedFilesFolder = "G:\DBs to Merge\NewEmoDB"
 $outputFilePath = "G:\DBs to Merge\NewEmoDB\OutputLog.txt"
 
@@ -95,13 +97,9 @@ Remove-Item -Path $renamedFilesFolder\* -Recurse -Force
 #Loop through the files & convert & skip boredom
 $emodbFiles = Get-ChildItem -Path $emodbFolder -Filter *.wav
 
-$counter = 0
-
 foreach ($emodbFile in $emodbFiles) {
     #Adding the counter fixed the missing files, so I'm ending up with doubled up files names some how
 	$convertedFilename = Convert-EmoDBToRAVDESS -emodbFilename $emodbFile.BaseName
-	$convertedFilename = $convertedFilename + '-' + $counter
-	$counter += 1
 	
 	#Check if the emotion code is 'L' and skip it
 	if ($emodbFile.BaseName.Substring(5, 1) -eq 'L') {
