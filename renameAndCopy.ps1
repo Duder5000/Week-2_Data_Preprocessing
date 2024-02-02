@@ -42,10 +42,7 @@ function Convert-EmoDBToRAVDESS{
 		$speakerNumber = 99
 	}
 	
-    
-	#$textCode = $emodbFilename.Substring(2, 3)
     $emotionCode = $emodbFilename.Substring(5, 1)
-	$emotionCode = [char]::ToUpper($emotionCode) #Checking if forcing to upper char could fix not getting all te=he files
 	
 	$intensityCode = '01' #Set all to Normal intensity
 	$statementCode = '03' #Set all do a diffrent statement than the 2 in RAVDESS
@@ -90,6 +87,7 @@ function ConvertToNumber{
 #Target folders
 $emodbFolder = "G:\DBs to Merge\EmoDB"
 $renamedFilesFolder = "G:\DBs to Merge\NewEmoDB"
+$outputFilePath = "G:\DBs to Merge\NewEmoDB\OutputLog.txt"
 
 #Clean new folder before copying
 Remove-Item -Path $renamedFilesFolder\* -Recurse -Force
@@ -97,14 +95,20 @@ Remove-Item -Path $renamedFilesFolder\* -Recurse -Force
 #Loop through the files & convert & skip boredom
 $emodbFiles = Get-ChildItem -Path $emodbFolder -Filter *.wav
 
+$counter = 0
+
 foreach ($emodbFile in $emodbFiles) {
-    $convertedFilename = Convert-EmoDBToRAVDESS -emodbFilename $emodbFile.BaseName
+    #Adding the counter fixed the missing files, so I'm ending up with doubled up files names some how
+	$convertedFilename = Convert-EmoDBToRAVDESS -emodbFilename $emodbFile.BaseName
+	$convertedFilename = $convertedFilename + '-' + $counter
+	$counter += 1
+	
 	#Check if the emotion code is 'L' and skip it
 	if ($emodbFile.BaseName.Substring(5, 1) -eq 'L') {
-		#Skip copying
-	}else{
+		Add-Content -Path $outputFilePath -Value "Skip $($emodbFile.Name)"
+	} else {
 		$destinationPath = Join-Path -Path $renamedFilesFolder -ChildPath "$convertedFilename.wav"
 		Copy-Item -Path $emodbFile.FullName -Destination $destinationPath
-		Write-Host "EmoDB Filename: $($emodbFile.Name) -> RAVDESS Filename: $($convertedFilename).wav"
-    }
+		Add-Content -Path $outputFilePath -Value "EmoDB: $($emodbFile.Name) --> RAVDESS: $($convertedFilename).wav"
+	}
 }
