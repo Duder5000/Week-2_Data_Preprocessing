@@ -42,12 +42,25 @@ function Convert-EmoDBToRAVDESS{
 		$speakerNumber = 99
 	}
 	
+	#https://www.kaggle.com/datasets/piyushagni5/berlin-database-of-emotional-speech-emodb
+	
 	$speakingTextCode = $emodbFilename.Substring(2, 3)	
 	
-    $emotionCode = $emodbFilename.Substring(5, 1)
+	if($speakingTextCode.Substring(0, 1) -eq 'a'){
+		$intensityCode = '01'
+	}elseif($speakingTextCode.Substring(0, 1) -eq 'b'){
+		$intensityCode = '02'
+	}else{ 
+		$intensityCode = '99'
+	}
+	    
+	#Add-Content -Path $outputFilePath -Value $speakingTextCode.Substring(1)
+	$statementCode = $speakingTextCode.Substring(1)
 	
-	$intensityCode = '01' #Set all to Normal intensity
-	$statementCode = $speakingTextCode #'03' #Set all do a diffrent statement than the 2 in RAVDESS
+	#$intensityCode = '01' #Set all to Normal intensity
+	#$statementCode = '03' #Set all do a diffrent statement than the 2 in RAVDESS
+	
+	$emotionCode = $emodbFilename.Substring(5, 1)
 	
 	$repCode = $emodbFilename.Substring(6)
 	$repCode = ConvertToNumber($repCode)
